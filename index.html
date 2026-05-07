@@ -12,15 +12,15 @@
 body{
 margin:0;
 font-family:Arial,sans-serif;
-background:#111;
-color:white;
+background:#dfe8ea;
+color:#24424a;
 }
 
 header{
 padding:15px;
 position:sticky;
 top:0;
-background:#111;
+background:#dfe8ea;
 z-index:10;
 }
 
@@ -31,6 +31,8 @@ border:none;
 border-radius:12px;
 font-size:16px;
 box-sizing:border-box;
+background:white;
+color:#24424a;
 }
 
 .grid{
@@ -41,7 +43,7 @@ padding:12px;
 }
 
 .card{
-background:#1a1a1a;
+background:#f4f8f9;
 border-radius:12px;
 overflow:hidden;
 }
@@ -72,7 +74,7 @@ align-items:center;
 button,a{
 background:none;
 border:none;
-color:white;
+color:#24424a;
 font-size:20px;
 cursor:pointer;
 text-decoration:none;
@@ -83,7 +85,7 @@ position:fixed;
 bottom:0;
 left:0;
 right:0;
-background:#1a1a1a;
+background:#d6e3e6;
 display:flex;
 justify-content:space-around;
 padding:10px;
@@ -295,22 +297,10 @@ render(videos);
 
 function sendFavs(){
 
-const favs =
-JSON.parse(
-localStorage.getItem("favs") || "[]"
+window.open(
+"https://m.me/MelodiaWiary",
+"_blank"
 );
-
-const selected =
-videos.filter(v =>
-favs.includes(v.youtube)
-);
-
-const text =
-selected.map(v => v.title)
-.join("%0D%0A");
-
-window.location.href =
-`mailto:twojmail@example.com?subject=Ulubione pieśni&body=${text}`;
 
 }
 
