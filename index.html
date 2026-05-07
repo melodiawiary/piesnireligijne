@@ -232,9 +232,19 @@ createCategories();
 function createCategories(){
 
 const uniqueCategories =
-[...new Set(
-videos.map(v => v.category)
-)];
+[
+...new Set(
+
+videos.flatMap(v =>
+
+v.category
+.split(",")
+.map(c => c.trim())
+
+)
+
+)
+];
 
 categoriesContainer.innerHTML = "";
 
@@ -251,7 +261,7 @@ div.onclick = () => {
 
 const filtered =
 videos.filter(v =>
-v.category === cat
+v.category.includes(cat)
 );
 
 render(filtered);
