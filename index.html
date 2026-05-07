@@ -1,1 +1,226 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Moje Filmy</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:15px;
+    background:#111;
+    color:white;
+    font-family:Arial;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+#search{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    margin-bottom:20px;
+    box-sizing:border-box;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.card{
+    background:#1c1c1c;
+    border-radius:14px;
+    overflow:hidden;
+}
+
+.card img{
+    width:100%;
+    display:block;
+}
+
+.info{
+    padding:10px;
+}
+
+.title{
+    font-size:14px;
+    line-height:1.4;
+    margin-bottom:10px;
+}
+
+.actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+button{
+    border:none;
+    background:none;
+    color:white;
+    font-size:22px;
+    cursor:pointer;
+}
+
+a{
+    color:white;
+    text-decoration:none;
+}
+
+@media(min-width:700px){
+
+.grid{
+    grid-template-columns:
+    repeat(auto-fill,minmax(220px,1fr));
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Moje Filmy</h1>
+
+<input type="text" id="search" placeholder="Szukaj...">
+
+<div class="grid" id="videos"></div>
+
+<script>
+
+const sheetURL = "TUTAJ_WKLEJ_LINK_CSV";
+
+const container = document.getElementById("videos");
+const search = document.getElementById("search");
+
+let videos = [];
+
+fetch(sheetURL)
+.then(res => res.text())
+.then(data => {
+
+const rows = data.split("\n").slice(1);
+
+videos = rows.map(row => {
+
+const cols = row.split(",");
+
+return {
+title: cols[0],
+youtube: cols[1]
+};
+
+});
+
+render(videos);
+
+});
+
+function getYouTubeID(url){
+
+const match = url.match(/v=([^&]+)/);
+
+return match ? match[1] : "";
+
+}
+
+function render(list){
+
+container.innerHTML = "";
+
+list.forEach(video => {
+
+const id = getYouTubeID(video.youtube);
+
+const thumb =
+`https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+
+const favs =
+JSON.parse(localStorage.getItem("favs") || "[]");
+
+const liked = favs.includes(id);
+
+const card = document.createElement("div");
+
+card.className = "card";
+
+card.innerHTML = `
+<img src="${thumb}">
+<div class="info">
+
+<div class="title">
+${video.title}
+</div>
+
+<div class="actions">
+
+<a href="${video.youtube}"
+target="_blank">
+▶
+</a>
+
+<button onclick="toggleFav('${id}')">
+${liked ? '❤️' : '🤍'}
+</button>
+
+</div>
+
+</div>
+`;
+
+container.appendChild(card);
+
+});
+
+}
+
+function toggleFav(id){
+
+let favs =
+JSON.parse(localStorage.getItem("favs") || "[]");
+
+if(favs.includes(id)){
+
+favs = favs.filter(f => f !== id);
+
+}else{
+
+favs.push(id);
+
+}
+
+localStorage.setItem("favs",
+JSON.stringify(favs));
+
+render(videos);
+
+}
+
+search.addEventListener("input", e => {
+
+const text =
+e.target.value.toLowerCase();
+
+const filtered = videos.filter(v =>
+v.title.toLowerCase().includes(text)
+);
+
+render(filtered);
+
+});
+
+</script>
+
+</body>
+</html>
