@@ -1,87 +1,103 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Pieśni Religijne</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Melodia Wiary</title>
 
 <style>
 
 body{
-    margin:0;
-    padding:15px;
-    background:#111;
-    color:white;
-    font-family:Arial;
+margin:0;
+font-family:Arial,sans-serif;
+background:#111;
+color:white;
 }
 
-h1{
-    text-align:center;
-    margin-bottom:20px;
+header{
+padding:15px;
+position:sticky;
+top:0;
+background:#111;
+z-index:10;
 }
 
-#search{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:12px;
-    font-size:16px;
-    margin-bottom:20px;
-    box-sizing:border-box;
+input{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+font-size:16px;
+box-sizing:border-box;
 }
 
 .grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+padding:12px;
 }
 
 .card{
-    background:#1c1c1c;
-    border-radius:14px;
-    overflow:hidden;
+background:#1a1a1a;
+border-radius:12px;
+overflow:hidden;
 }
 
 .card img{
-    width:100%;
-    display:block;
+width:100%;
+display:block;
+aspect-ratio:16/9;
+object-fit:cover;
 }
 
 .info{
-    padding:10px;
+padding:8px;
 }
 
 .title{
-    font-size:14px;
-    line-height:1.4;
-    margin-bottom:10px;
+font-size:13px;
+line-height:1.4;
+margin-bottom:8px;
 }
 
-.actions{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
+.buttons{
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
 
-button{
-    border:none;
-    background:none;
-    color:white;
-    font-size:22px;
-    cursor:pointer;
+button,a{
+background:none;
+border:none;
+color:white;
+font-size:20px;
+cursor:pointer;
+text-decoration:none;
 }
 
-a{
-    color:white;
-    text-decoration:none;
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#1a1a1a;
+display:flex;
+justify-content:space-around;
+padding:10px;
+}
+
+.spacer{
+height:70px;
 }
 
 @media(min-width:700px){
 
 .grid{
-    grid-template-columns:
-    repeat(auto-fill,minmax(220px,1fr));
+grid-template-columns:
+repeat(auto-fill,minmax(220px,1fr));
 }
 
 }
@@ -91,102 +107,118 @@ a{
 
 <body>
 
-<h1>Pieśni Religijne</h1>
-
-<input type="text" id="search" placeholder="Szukaj...">
+<header>
+<input
+type="text"
+id="search"
+placeholder="Szukaj pieśni...">
+</header>
 
 <div class="grid" id="videos"></div>
 
+<div class="spacer"></div>
+
+<div class="bottom">
+
+<button onclick="showAll()">
+🎵
+</button>
+
+<button onclick="showFavs()">
+❤️
+</button>
+
+<button onclick="sendFavs()">
+✉️
+</button>
+
+</div>
+
 <script>
 
-const sheetURL = "https://docs.google.com/spreadsheets/d/1aidR9y-TH5uAU_JFjeCuTDGhnDExpMVefn45AhW0UdM/edit?usp=sharing";
+const SHEET_ID =
+"1aidR9y-TH5uAU_JFjeCuTDGhnDExpMVefn45AhW0UdM";
 
-const container = document.getElementById("videos");
-const search = document.getElementById("search");
+const url =
+`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
 let videos = [];
+let showingFavs = false;
 
-fetch(sheetURL)
+const container =
+document.getElementById("videos");
+
+fetch(url)
 .then(res => res.text())
-.then(data => {
+.then(text => {
 
-const rows = data.split("\n").slice(1);
+const json =
+JSON.parse(
+text.substring(47).slice(0,-2)
+);
 
-videos = rows.map(row => {
+const rows =
+json.table.rows;
 
-const cols = row.split(",");
-
-return {
+videos = rows.map(r => ({
 
 title:
-cols[0]?.replace(/"/g,"").trim() || "",
+r.c[0]?.v || "",
 
 category:
-cols[1]?.replace(/"/g,"").trim() || "",
-
-order:
-parseInt(cols[4]) || 0,
+r.c[1]?.v || "",
 
 youtube:
-cols[7]?.replace(/"/g,"").trim() || ""
+r.c[7]?.v || "",
 
-};
+image:
+r.c[8]?.v || ""
 
-})
-
-.filter(v => v.youtube.includes("youtube"))
-
-.sort((a,b) => b.order - a.order);
+}));
 
 render(videos);
 
 });
 
-function getYouTubeID(url){
-
-const match = url.match(/v=([^&]+)/);
-
-return match ? match[1] : "";
-
-}
-
 function render(list){
 
 container.innerHTML = "";
 
+const favs =
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
+
 list.forEach(video => {
 
-const id = getYouTubeID(video.youtube);
+const card =
+document.createElement("div");
 
-const thumb =
-`https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-
-const favs =
-JSON.parse(localStorage.getItem("favs") || "[]");
-
-const liked = favs.includes(id);
-
-const card = document.createElement("div");
+const liked =
+favs.includes(video.youtube);
 
 card.className = "card";
 
 card.innerHTML = `
-<img src="${thumb}">
+
+<img src="${video.image}">
+
 <div class="info">
 
 <div class="title">
 ${video.title}
 </div>
 
-<div class="actions">
+<div class="buttons">
 
 <a href="${video.youtube}"
 target="_blank">
-▶
+▶️
 </a>
 
-<button onclick="toggleFav('${id}')">
-${liked ? '❤️' : '🤍'}
+<button onclick=
+"toggleFav('${video.youtube}')">
+${liked ? "❤️" : "🤍"}
 </button>
 
 </div>
@@ -200,35 +232,108 @@ container.appendChild(card);
 
 }
 
-function toggleFav(id){
+function toggleFav(link){
 
 let favs =
-JSON.parse(localStorage.getItem("favs") || "[]");
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
 
-if(favs.includes(id)){
+if(favs.includes(link)){
 
-favs = favs.filter(f => f !== id);
+favs =
+favs.filter(f => f !== link);
 
 }else{
 
-favs.push(id);
+favs.push(link);
 
 }
 
-localStorage.setItem("favs",
-JSON.stringify(favs));
+localStorage.setItem(
+"favs",
+JSON.stringify(favs)
+);
+
+if(showingFavs){
+
+showFavs();
+
+}else{
 
 render(videos);
 
 }
 
-search.addEventListener("input", e => {
+}
+
+function showFavs(){
+
+showingFavs = true;
+
+const favs =
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
+
+const filtered =
+videos.filter(v =>
+favs.includes(v.youtube)
+);
+
+render(filtered);
+
+}
+
+function showAll(){
+
+showingFavs = false;
+
+render(videos);
+
+}
+
+function sendFavs(){
+
+const favs =
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
+
+const selected =
+videos.filter(v =>
+favs.includes(v.youtube)
+);
 
 const text =
+selected.map(v => v.title)
+.join("%0D%0A");
+
+window.location.href =
+`mailto:twojmail@example.com?subject=Ulubione pieśni&body=${text}`;
+
+}
+
+document
+.getElementById("search")
+.addEventListener("input", e => {
+
+const value =
 e.target.value.toLowerCase();
 
-const filtered = videos.filter(v =>
-v.title.toLowerCase().includes(text)
+const filtered =
+videos.filter(v =>
+
+v.title
+.toLowerCase()
+.includes(value)
+
+||
+
+v.category
+.toLowerCase()
+.includes(value)
+
 );
 
 render(filtered);
