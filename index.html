@@ -36,6 +36,24 @@ background:white;
 color:#24424a;
 }
 
+.categories{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+padding:12px;
+}
+
+.category{
+background:#f4f8f9;
+border-radius:16px;
+padding:25px 10px;
+text-align:center;
+font-size:18px;
+font-weight:700;
+cursor:pointer;
+box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
 .grid{
 display:grid;
 grid-template-columns:repeat(2,1fr);
@@ -98,9 +116,18 @@ padding:10px;
 height:70px;
 }
 
+.hidden{
+display:none;
+}
+
 @media(min-width:700px){
 
 .grid{
+grid-template-columns:
+repeat(auto-fill,minmax(220px,1fr));
+}
+
+.categories{
 grid-template-columns:
 repeat(auto-fill,minmax(220px,1fr));
 }
@@ -113,20 +140,24 @@ repeat(auto-fill,minmax(220px,1fr));
 <body>
 
 <header>
+
 <input
 type="text"
 id="search"
 placeholder="SZUKAJ PIEŚNI...">
+
 </header>
 
-<div class="grid" id="videos"></div>
+<div class="categories" id="categories"></div>
+
+<div class="grid hidden" id="videos"></div>
 
 <div class="spacer"></div>
 
 <div class="bottom">
 
-<button onclick="showAll()">
-🎵
+<button onclick="showCategories()">
+🏠
 </button>
 
 <button onclick="showFavs()">
@@ -152,13 +183,17 @@ const url =
 `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
 
 let videos = [];
-let showingFavs = false;
 
 const container =
 document.getElementById("videos");
 
+const categoriesContainer =
+document.getElementById("categories");
+
 fetch(url)
+
 .then(res => res.text())
+
 .then(text => {
 
 const json =
@@ -190,11 +225,67 @@ r.c[8]?.v || ""
 
 .sort((a,b) => b.order - a.order);
 
-render(videos);
+createCategories();
 
 });
 
+function createCategories(){
+
+const uniqueCategories =
+[...new Set(
+videos.map(v => v.category)
+)];
+
+categoriesContainer.innerHTML = "";
+
+uniqueCategories.forEach(cat => {
+
+const div =
+document.createElement("div");
+
+div.className = "category";
+
+div.innerHTML = cat;
+
+div.onclick = () => {
+
+const filtered =
+videos.filter(v =>
+v.category === cat
+);
+
+render(filtered);
+
+};
+
+categoriesContainer.appendChild(div);
+
+});
+
+const all =
+document.createElement("div");
+
+all.className = "category";
+
+all.innerHTML = "WSZYSTKIE PIEŚNI";
+
+all.onclick = () => {
+
+render(videos);
+
+};
+
+categoriesContainer.appendChild(all);
+
+}
+
 function render(list){
+
+categoriesContainer
+.classList.add("hidden");
+
+container
+.classList.remove("hidden");
 
 container.innerHTML = "";
 
@@ -269,21 +360,9 @@ localStorage.setItem(
 JSON.stringify(favs)
 );
 
-if(showingFavs){
-
-showFavs();
-
-}else{
-
-render(videos);
-
-}
-
 }
 
 function showFavs(){
-
-showingFavs = true;
 
 const favs =
 JSON.parse(
@@ -299,11 +378,12 @@ render(filtered);
 
 }
 
-function showAll(){
+function showCategories(){
 
-showingFavs = false;
+container.classList.add("hidden");
 
-render(videos);
+categoriesContainer
+.classList.remove("hidden");
 
 }
 
@@ -320,14 +400,20 @@ favs.includes(v.youtube)
 );
 
 return selected
-.map(v => "• " + v.order + " - " + v.title)
+.map(v =>
+"• " +
+v.order +
+" - " +
+v.title
+)
 .join("%0A");
 
 }
 
 function sendMessenger(){
 
-const list = getFavMessage();
+const list =
+getFavMessage();
 
 const message =
 encodeURIComponent(
@@ -341,7 +427,8 @@ window.location.href =
 
 function sendEmail(){
 
-const list = getFavMessage();
+const list =
+getFavMessage();
 
 const message =
 encodeURIComponent(
@@ -349,7 +436,7 @@ encodeURIComponent(
 ) + list;
 
 window.location.href =
-`mailto:twojmail@example.com?subject=Lista utworów&body=${message}`;
+`mailto:melodiawiary@gmail.com?subject=Lista utworów&body=${message}`;
 
 }
 
