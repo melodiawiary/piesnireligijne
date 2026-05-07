@@ -220,7 +220,7 @@ card.innerHTML = `
 <div class="info">
 
 <div class="title">
-${video.title}
+${video.order} - ${video.title}
 </div>
 
 <div class="buttons">
@@ -320,7 +320,7 @@ favs.includes(v.youtube)
 );
 
 return selected
-.map(v => "• " + v.title)
+.map(v => "• " + v.order + " - " + v.title)
 .join("%0A");
 
 }
