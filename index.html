@@ -117,11 +117,13 @@ videos = rows.map(row => {
 const cols = row.split(",");
 
 return {
-title: cols[0],
-youtube: cols[1]
+
+title: cols[0]?.replace(/"/g,"") || "",
+youtube: cols[5]?.replace(/"/g,"") || ""
+
 };
 
-});
+}).filter(v => v.youtube.includes("youtube"));
 
 render(videos);
 
