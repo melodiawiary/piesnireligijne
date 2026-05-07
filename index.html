@@ -29,7 +29,8 @@ width:100%;
 padding:14px;
 border:none;
 border-radius:12px;
-font-size:16px;
+font-size:20px;
+font-weight:700;
 box-sizing:border-box;
 background:white;
 color:#24424a;
@@ -60,9 +61,11 @@ padding:8px;
 }
 
 .title{
-font-size:13px;
-line-height:1.4;
-margin-bottom:8px;
+font-size:17px;
+line-height:1.5;
+margin-bottom:10px;
+font-weight:700;
+text-transform:uppercase;
 }
 
 .buttons{
@@ -113,7 +116,7 @@ repeat(auto-fill,minmax(220px,1fr));
 <input
 type="text"
 id="search"
-placeholder="Szukaj pieśni...">
+placeholder="SZUKAJ PIEŚNI...">
 </header>
 
 <div class="grid" id="videos"></div>
@@ -170,13 +173,18 @@ r.c[0]?.v || "",
 category:
 r.c[1]?.v || "",
 
+order:
+parseInt(r.c[4]?.v || 0),
+
 youtube:
 r.c[7]?.v || "",
 
 image:
 r.c[8]?.v || ""
 
-}));
+}))
+
+.sort((a,b) => b.order - a.order);
 
 render(videos);
 
@@ -297,10 +305,43 @@ render(videos);
 
 function sendFavs(){
 
+const favs =
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
+
+const selected =
+videos.filter(v =>
+favs.includes(v.youtube)
+);
+
+const list =
+selected.map(v => "• " + v.title)
+.join("%0A");
+
+const message =
+encodeURIComponent(
+"Szczęść Boże, Niech będzie pochwalony Jezus Chrystus.\n\nOto moja lista utworów, którymi jestem zainteresowany/a:\n\n"
+) + list;
+
+const useMessenger =
+confirm(
+"OK = Messenger\nANULUJ = E-mail"
+);
+
+if(useMessenger){
+
 window.open(
-"https://m.me/MelodiaWiary",
+`https://m.me/MelodiaWiary?text=${message}`,
 "_blank"
 );
+
+}else{
+
+window.location.href =
+`mailto:twojmail@example.com?subject=Lista utworów&body=${message}`;
+
+}
 
 }
 
