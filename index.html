@@ -239,13 +239,16 @@ videos.flatMap(v =>
 
 v.category
 .split(",")
-.map(c => c.trim())
+map(c => c.trim())
+.filter(c => c.length > 0)
 
 )
 
 )
 
 ]
+
+.filter(c => c.length > 0)
 
 .sort((a,b) =>
 a.localeCompare(
