@@ -256,21 +256,6 @@ b,
 
 categoriesContainer.innerHTML = "";
 
-const all =
-document.createElement("div");
-
-all.className = "category";
-
-all.innerHTML = "WSZYSTKIE PIEŚNI";
-
-all.onclick = () => {
-
-render(videos);
-
-};
-
-categoriesContainer.appendChild(all);
-
 uniqueCategories.forEach(cat => {
 
 const div =
@@ -295,6 +280,20 @@ categoriesContainer.appendChild(div);
 
 });
 
+const all =
+document.createElement("div");
+
+all.className = "category";
+
+all.innerHTML = "WSZYSTKIE PIEŚNI";
+
+all.onclick = () => {
+
+render(videos);
+
+};
+
+categoriesContainer.appendChild(all);
 
 }
 
