@@ -1,4 +1,313 @@
-function sendFavs(){
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>Melodia Wiary</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#dfe8ea;
+color:#24424a;
+}
+
+header{
+padding:15px;
+position:sticky;
+top:0;
+background:#dfe8ea;
+z-index:10;
+}
+
+input{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+font-size:20px;
+font-weight:700;
+box-sizing:border-box;
+background:white;
+color:#24424a;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:12px;
+padding:12px;
+}
+
+.card{
+background:#f4f8f9;
+border-radius:12px;
+overflow:hidden;
+}
+
+.card img{
+width:100%;
+display:block;
+aspect-ratio:16/9;
+object-fit:cover;
+}
+
+.info{
+padding:8px;
+}
+
+.title{
+font-size:17px;
+line-height:1.5;
+margin-bottom:10px;
+font-weight:700;
+text-transform:uppercase;
+}
+
+.buttons{
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+button,a{
+background:none;
+border:none;
+color:#24424a;
+font-size:20px;
+cursor:pointer;
+text-decoration:none;
+}
+
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#d6e3e6;
+display:flex;
+justify-content:space-around;
+padding:10px;
+}
+
+.spacer{
+height:70px;
+}
+
+@media(min-width:700px){
+
+.grid{
+grid-template-columns:
+repeat(auto-fill,minmax(220px,1fr));
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+<input
+type="text"
+id="search"
+placeholder="SZUKAJ PIEŚNI...">
+</header>
+
+<div class="grid" id="videos"></div>
+
+<div class="spacer"></div>
+
+<div class="bottom">
+
+<button onclick="showAll()">
+🎵
+</button>
+
+<button onclick="showFavs()">
+❤️
+</button>
+
+<button onclick="sendMessenger()">
+💬
+</button>
+
+<button onclick="sendEmail()">
+✉️
+</button>
+
+</div>
+
+<script>
+
+const SHEET_ID =
+"1aidR9y-TH5uAU_JFjeCuTDGhnDExpMVefn45AhW0UdM";
+
+const url =
+`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+
+let videos = [];
+let showingFavs = false;
+
+const container =
+document.getElementById("videos");
+
+fetch(url)
+.then(res => res.text())
+.then(text => {
+
+const json =
+JSON.parse(
+text.substring(47).slice(0,-2)
+);
+
+const rows =
+json.table.rows;
+
+videos = rows.map(r => ({
+
+title:
+r.c[0]?.v || "",
+
+category:
+r.c[1]?.v || "",
+
+order:
+parseInt(r.c[4]?.v || 0),
+
+youtube:
+r.c[7]?.v || "",
+
+image:
+r.c[8]?.v || ""
+
+}))
+
+.sort((a,b) => b.order - a.order);
+
+render(videos);
+
+});
+
+function render(list){
+
+container.innerHTML = "";
+
+const favs =
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
+
+list.forEach(video => {
+
+const card =
+document.createElement("div");
+
+const liked =
+favs.includes(video.youtube);
+
+card.className = "card";
+
+card.innerHTML = `
+
+<img src="${video.image}">
+
+<div class="info">
+
+<div class="title">
+${video.title}
+</div>
+
+<div class="buttons">
+
+<a href="${video.youtube}"
+target="_blank">
+▶️
+</a>
+
+<button onclick=
+"toggleFav('${video.youtube}')">
+${liked ? "❤️" : "🤍"}
+</button>
+
+</div>
+
+</div>
+`;
+
+container.appendChild(card);
+
+});
+
+}
+
+function toggleFav(link){
+
+let favs =
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
+
+if(favs.includes(link)){
+
+favs =
+favs.filter(f => f !== link);
+
+}else{
+
+favs.push(link);
+
+}
+
+localStorage.setItem(
+"favs",
+JSON.stringify(favs)
+);
+
+if(showingFavs){
+
+showFavs();
+
+}else{
+
+render(videos);
+
+}
+
+}
+
+function showFavs(){
+
+showingFavs = true;
+
+const favs =
+JSON.parse(
+localStorage.getItem("favs") || "[]"
+);
+
+const filtered =
+videos.filter(v =>
+favs.includes(v.youtube)
+);
+
+render(filtered);
+
+}
+
+function showAll(){
+
+showingFavs = false;
+
+render(videos);
+
+}
+
+function getFavMessage(){
 
 const favs =
 JSON.parse(
@@ -10,32 +319,67 @@ videos.filter(v =>
 favs.includes(v.youtube)
 );
 
-const list =
-selected.map(v => "• " + v.title)
+return selected
+.map(v => "• " + v.title)
 .join("%0A");
+
+}
+
+function sendMessenger(){
+
+const list = getFavMessage();
 
 const message =
 encodeURIComponent(
 "Szczęść Boże, Niech będzie pochwalony Jezus Chrystus.\n\nOto moja lista utworów, którymi jestem zainteresowany/a:\n\n"
 ) + list;
 
-const useMessenger =
-confirm(
-"OK = Messenger\nANULUJ = E-mail"
-);
+window.location.href =
+`https://m.me/MelodiaWiary?text=${message}`;
 
-if(useMessenger){
+}
 
-window.open(
-`https://m.me/MelodiaWiary?text=${message}`,
-"_blank"
-);
+function sendEmail(){
 
-}else{
+const list = getFavMessage();
+
+const message =
+encodeURIComponent(
+"Szczęść Boże, Niech będzie pochwalony Jezus Chrystus.\n\nOto moja lista utworów, którymi jestem zainteresowany/a:\n\n"
+) + list;
 
 window.location.href =
 `mailto:twojmail@example.com?subject=Lista utworów&body=${message}`;
 
 }
 
-}
+document
+.getElementById("search")
+.addEventListener("input", e => {
+
+const value =
+e.target.value.toLowerCase();
+
+const filtered =
+videos.filter(v =>
+
+v.title
+.toLowerCase()
+.includes(value)
+
+||
+
+v.category
+.toLowerCase()
+.includes(value)
+
+);
+
+render(filtered);
+
+});
+
+</script>
+
+</body>
+</html>
