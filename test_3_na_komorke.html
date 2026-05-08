@@ -345,37 +345,41 @@ videos.filter(v =>
 favs.includes(v.youtube)
 );
 
+if(selected.length === 0) return "";
+
 const discs = buildDiscs(selected);
 
-let lines = "Szczęść Boże Melodio Wiary!%0ANiech będzie pochwalony Jezus Chrystus.%0A%0AJestem zainteresowany/a płytami z tą muzyką:%0A%0A";
+let msg = "Szczęść Boże Melodio Wiary!\nNiech będzie pochwalony Jezus Chrystus.\n\nJestem zainteresowany/a płytami z tą muzyką:\n\n";
 
 discs.forEach((disc, idx) => {
-lines += "PŁYTA NUMER " + (idx+1) + ":%0A";
+msg += "PŁYTA NUMER " + (idx+1) + ":\n";
 disc.forEach(v => {
-lines += "• " + v.order + " - " + v.title + "%0A";
+msg += "• " + v.order + " - " + v.title + "\n";
 });
-lines += "%0A";
+msg += "\n";
 });
 
-return lines;
+return msg;
 
 }
 
 function sendMessenger(){
 
-const message = getFavMessage();
+const msg = getFavMessage();
+if(!msg){ alert("Nie masz jeszcze ulubionych piosenek!"); return; }
 
 window.location.href =
-`https://m.me/MelodiaWiary?text=${message}`;
+"https://m.me/MelodiaWiary?text=" + encodeURIComponent(msg);
 
 }
 
 function sendEmail(){
 
-const message = getFavMessage();
+const msg = getFavMessage();
+if(!msg){ alert("Nie masz jeszcze ulubionych piosenek!"); return; }
 
 window.location.href =
-`mailto:melodiawiary@gmail.com?subject=Zamówienie płyt Melodia Wiary&body=${message}`;
+"mailto:melodiawiary@gmail.com?subject=Zam%C3%B3wienie+p%C5%82yt+Melodia+Wiary&body=" + encodeURIComponent(msg);
 
 }
 
