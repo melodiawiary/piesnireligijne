@@ -220,6 +220,74 @@ height:28px;
 border-radius:6px;
 }
 
+/* MODAL EMAIL */
+#email-modal-overlay{
+position:fixed;
+top:0;left:0;right:0;bottom:0;
+background:rgba(0,0,0,0.5);
+z-index:2000;
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+#email-modal-overlay.open{
+display:flex;
+}
+
+.email-modal{
+background:white;
+border-radius:20px;
+padding:25px 20px;
+width:85%;
+max-width:320px;
+text-align:center;
+box-shadow:0 10px 40px rgba(0,0,0,0.2);
+}
+
+.email-modal h3{
+margin:0 0 8px;
+font-size:18px;
+color:#24424a;
+}
+
+.email-modal p{
+margin:0 0 20px;
+font-size:14px;
+color:#666;
+}
+
+.email-modal-btns{
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.email-modal-btn{
+padding:14px;
+border-radius:12px;
+border:none;
+font-size:16px;
+font-weight:700;
+cursor:pointer;
+}
+
+.email-modal-btn.primary{
+background:#24424a;
+color:white;
+}
+
+.email-modal-btn.secondary{
+background:#dfe8ea;
+color:#24424a;
+}
+
+.email-modal-btn.cancel{
+background:none;
+color:#999;
+font-size:14px;
+}
+
 .drawer-motto{
 text-align:center;
 padding:20px 20px 30px;
@@ -564,9 +632,30 @@ function sendEmail(){
 const msg = getFavMessage();
 if(!msg){ alert("Nie masz jeszcze ulubionych piosenek!"); return; }
 
+document.getElementById("email-modal-overlay").classList.add("open");
+
+}
+
+function closeEmailModal(){
+document.getElementById("email-modal-overlay").classList.remove("open");
+}
+
+function doOpenEmail(){
+closeEmailModal();
+const msg = getFavMessage();
 window.location.href =
 "mailto:melodiawiary@gmail.com?subject=Zam%C3%B3wienie+p%C5%82yt+Melodia+Wiary&body=" + encodeURIComponent(msg);
+}
 
+function doCopyOrder(){
+const msg = getFavMessage();
+navigator.clipboard.writeText(msg).then(() => {
+closeEmailModal();
+alert("✅ Skopiowano! Wklej zamówienie w dowolną wiadomość.");
+}).catch(() => {
+closeEmailModal();
+alert("Nie udało się skopiować. Spróbuj ręcznie.");
+});
 }
 
 document
@@ -617,6 +706,18 @@ if(diff < -60) closeDrawer();
 });
 
 </script>
+
+<div id="email-modal-overlay">
+  <div class="email-modal">
+    <h3>✉️ Wyślij zamówienie</h3>
+    <p>Jak chcesz wysłać swoją listę piosenek?</p>
+    <div class="email-modal-btns">
+      <button class="email-modal-btn primary" onclick="doOpenEmail()">✉️ Otwórz pocztę</button>
+      <button class="email-modal-btn secondary" onclick="doCopyOrder()">📋 Kopiuj do schowka</button>
+      <button class="email-modal-btn cancel" onclick="closeEmailModal()">Anuluj</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
