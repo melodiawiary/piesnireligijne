@@ -288,6 +288,30 @@ color:#999;
 font-size:14px;
 }
 
+/* WRÓĆ NA GÓRĘ */
+#back-to-top{
+position:fixed;
+bottom:80px;
+right:15px;
+width:44px;
+height:44px;
+border-radius:50%;
+background:#24424a;
+color:white;
+font-size:22px;
+border:none;
+cursor:pointer;
+display:none;
+align-items:center;
+justify-content:center;
+box-shadow:0 4px 12px rgba(0,0,0,0.2);
+z-index:500;
+}
+
+#back-to-top.visible{
+display:flex;
+}
+
 .drawer-motto{
 text-align:center;
 padding:20px 20px 30px;
@@ -705,25 +729,33 @@ document
 const value =
 e.target.value.toLowerCase();
 
-const filtered =
-videos.filter(v =>
+let pool = videos;
 
-v.title
-.toLowerCase()
-.includes(value)
+if(currentCat === "❤️ Ulubione"){
+const favs = JSON.parse(localStorage.getItem("favs") || "[]");
+pool = videos.filter(v => favs.includes(v.youtube));
+} else if(currentCat !== "Wszystkie"){
+pool = videos.filter(v =>
+v.category.split(",").map(c=>c.trim()).includes(currentCat)
+);
+}
 
+const filtered = pool.filter(v =>
+v.title.toLowerCase().includes(value)
 ||
-
-v.category
-.toLowerCase()
-.includes(value)
-
+v.category.toLowerCase().includes(value)
 );
 
 render(filtered);
 
 });
 
+
+window.addEventListener("scroll", () => {
+const btn = document.getElementById("back-to-top");
+if(window.scrollY > 300) btn.classList.add("visible");
+else btn.classList.remove("visible");
+});
 
 function openDrawer(){
 document.getElementById("drawer").classList.add("open");
@@ -761,13 +793,22 @@ const cats = ["Wszystkie", "❤️ Ulubione", ...Array.from(catSet).sort()];
 const bar = document.getElementById("cat-bar");
 bar.innerHTML = "";
 
+const favs = JSON.parse(localStorage.getItem("favs") || "[]");
+
 cats.forEach(cat => {
 const btn = document.createElement("button");
 const isUlubione = cat === "❤️ Ulubione";
+const isWszystkie = cat === "Wszystkie";
 btn.className = "cat-btn" + (cat === currentCat ? " active" : "");
 if(isUlubione) btn.style.borderColor = "#e53935";
 if(isUlubione && cat !== currentCat) btn.style.color = "#e53935";
-btn.textContent = cat;
+
+let count = "";
+if(isWszystkie) count = videos.length;
+else if(isUlubione) count = favs.length;
+else count = videos.filter(v => v.category.split(",").map(c=>c.trim()).includes(cat)).length;
+
+btn.textContent = cat + " (" + count + ")";
 btn.onclick = () => isUlubione ? setFavCategory() : setCategory(cat);
 bar.appendChild(btn);
 });
@@ -795,6 +836,8 @@ render(filtered);
 }
 
 </script>
+
+<button id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">⬆️</button>
 
 <div id="email-modal-overlay">
   <div class="email-modal">
