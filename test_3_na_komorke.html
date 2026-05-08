@@ -757,17 +757,27 @@ if(trimmed) catSet.add(trimmed);
 });
 });
 
-const cats = ["Wszystkie", ...Array.from(catSet).sort()];
+const cats = ["Wszystkie", "❤️ Ulubione", ...Array.from(catSet).sort()];
 const bar = document.getElementById("cat-bar");
 bar.innerHTML = "";
 
 cats.forEach(cat => {
 const btn = document.createElement("button");
+const isUlubione = cat === "❤️ Ulubione";
 btn.className = "cat-btn" + (cat === currentCat ? " active" : "");
+if(isUlubione) btn.style.borderColor = "#e53935";
+if(isUlubione && cat !== currentCat) btn.style.color = "#e53935";
 btn.textContent = cat;
-btn.onclick = () => setCategory(cat);
+btn.onclick = () => isUlubione ? setFavCategory() : setCategory(cat);
 bar.appendChild(btn);
 });
+}
+
+function setFavCategory(){
+currentCat = "❤️ Ulubione";
+showingFavs = true;
+buildCatBar();
+showFavs();
 }
 
 function setCategory(cat){
