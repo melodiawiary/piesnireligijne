@@ -133,14 +133,8 @@ placeholder="SZUKAJ PIEŚNI...">
 ❤️
 </button>
 
-<button onclick="sendMessenger()" style="background:none;border:none;cursor:pointer;padding:0;">
-<svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-<circle cx="18" cy="18" r="18" fill="url(#msg_grad)"/>
-<defs><linearGradient id="msg_grad" x1="0" y1="36" x2="36" y2="0" gradientUnits="userSpaceOnUse">
-<stop offset="0%" stop-color="#0078FF"/><stop offset="100%" stop-color="#A334FA"/>
-</linearGradient></defs>
-<path d="M18 7C11.925 7 7 11.6 7 17.3c0 3.2 1.575 6.05 4.05 7.95V29l3.75-2.05c1 .275 2.05.425 3.2.425 6.075 0 11-4.6 11-10.3C29 11.6 24.075 7 18 7zm1.1 13.85l-2.8-2.975-5.475 2.975 6.025-6.4 2.875 2.975 5.4-2.975-6.025 6.4z" fill="white"/>
-</svg>
+<button onclick="sendMessenger()">
+💬
 </button>
 
 <button onclick="sendEmail()">
@@ -187,7 +181,7 @@ order:
 parseInt(r.c[4]?.v || 0),
 
 duration:
-(typeof r.c[3]?.v === "string" ? r.c[3].v : (r.c[3]?.f || "0:00")),
+r.c[3]?.v || "0:00",
 
 youtube:
 r.c[7]?.v || "",
@@ -218,7 +212,7 @@ const card =
 document.createElement("div");
 
 const liked =
-favs.includes(String(video.order));
+favs.includes(video.youtube);
 
 card.className = "card";
 
@@ -240,7 +234,7 @@ target="_blank">
 </a>
 
 <button onclick=
-"toggleFav('${video.order}')">
+"toggleFav('${video.youtube}')">
 ${liked ? "❤️" : "🤍"}
 </button>
 
@@ -255,21 +249,21 @@ container.appendChild(card);
 
 }
 
-function toggleFav(order){
+function toggleFav(link){
 
 let favs =
 JSON.parse(
 localStorage.getItem("favs") || "[]"
 );
 
-if(favs.includes(order)){
+if(favs.includes(link)){
 
 favs =
-favs.filter(f => f !== order);
+favs.filter(f => f !== link);
 
 }else{
 
-favs.push(order);
+favs.push(link);
 
 }
 
@@ -301,7 +295,7 @@ localStorage.getItem("favs") || "[]"
 
 const filtered =
 videos.filter(v =>
-favs.includes(String(v.order))
+favs.includes(v.youtube)
 );
 
 render(filtered);
@@ -348,7 +342,7 @@ localStorage.getItem("favs") || "[]"
 
 const selected =
 videos.filter(v =>
-favs.includes(String(v.order))
+favs.includes(v.youtube)
 );
 
 if(selected.length === 0) return "";
@@ -360,7 +354,7 @@ let msg = "Szczęść Boże Melodio Wiary!\nNiech będzie pochwalony Jezus Chrys
 discs.forEach((disc, idx) => {
 msg += "PŁYTA NUMER " + (idx+1) + ":\n";
 disc.forEach(v => {
-msg += "\u2022 " + v.order + " - " + v.title + "\n";
+msg += "• " + v.order + " - " + v.title + "\n";
 });
 msg += "\n";
 });
@@ -374,8 +368,8 @@ function sendMessenger(){
 const msg = getFavMessage();
 if(!msg){ alert("Nie masz jeszcze ulubionych piosenek!"); return; }
 
-window.open(
-"https://m.me/MelodiaWiary?text=" + encodeURIComponent(msg), "_blank");
+window.location.href =
+"https://m.me/MelodiaWiary?text=" + encodeURIComponent(msg);
 
 }
 
@@ -384,8 +378,8 @@ function sendEmail(){
 const msg = getFavMessage();
 if(!msg){ alert("Nie masz jeszcze ulubionych piosenek!"); return; }
 
-window.open(
-"mailto:melodiawiary@gmail.com?subject=Zam%C3%B3wienie+p%C5%82yt+Melodia+Wiary&body=" + encodeURIComponent(msg), "_blank");
+window.location.href =
+"mailto:melodiawiary@gmail.com?subject=Zam%C3%B3wienie+p%C5%82yt+Melodia+Wiary&body=" + encodeURIComponent(msg);
 
 }
 
