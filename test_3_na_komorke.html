@@ -600,10 +600,20 @@ localStorage.setItem(
 JSON.stringify(favs)
 );
 
-const searchVal = document.getElementById("search").value;
-if(searchVal.trim() !== ""){
-// zostań w wynikach wyszukiwania
-document.getElementById("search").dispatchEvent(new Event("input"));
+const searchVal = document.getElementById("search").value.trim();
+if(searchVal !== ""){
+// zostań w wynikach wyszukiwania - przelicz ręcznie bez event
+let pool = videos;
+if(currentCat === "❤️ Ulubione" || showingFavs){
+const favs2 = JSON.parse(localStorage.getItem("favs") || "[]");
+pool = videos.filter(v => favs2.includes(v.youtube));
+} else if(currentCat !== "Wszystkie"){
+pool = videos.filter(v => v.category.split(",").map(c=>c.trim()).includes(currentCat));
+}
+render(pool.filter(v =>
+v.title.toLowerCase().includes(searchVal.toLowerCase()) ||
+v.category.toLowerCase().includes(searchVal.toLowerCase())
+));
 } else if(currentCat === "❤️ Ulubione" || showingFavs){
 setFavCategory();
 } else if(currentCat !== "Wszystkie"){
