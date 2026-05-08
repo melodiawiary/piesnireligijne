@@ -625,7 +625,8 @@ render(videos);
 
 function showFavs(){
 
-showingFavs = true;
+showingFavs = false;
+currentCat = "❤️ Ulubione";
 
 const favs =
 JSON.parse(
@@ -644,7 +645,8 @@ render(filtered);
 function showAll(){
 
 showingFavs = false;
-
+currentCat = "Wszystkie";
+buildCatBar();
 render(videos);
 
 }
