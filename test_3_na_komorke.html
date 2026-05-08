@@ -305,6 +305,44 @@ grid-template-columns:
 repeat(auto-fill,minmax(220px,1fr));
 }
 
+#cat-bar{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+padding:12px 12px 0;
+}
+
+.cat-btn{
+padding:8px 14px;
+border-radius:20px;
+border:2px solid #24424a;
+background:white;
+color:#24424a;
+font-size:14px;
+font-weight:700;
+cursor:pointer;
+white-space:nowrap;
+transition:background 0.2s, color 0.2s;
+}
+
+.cat-btn:hover{
+background:#24424a;
+color:white;
+}
+
+.cat-btn.active{
+background:#24424a;
+color:white;
+}
+
+}
+
+@media(max-width:699px){
+
+#cat-bar{
+display:none;
+}
+
 }
 
 </style>
@@ -368,6 +406,7 @@ placeholder="SZUKAJ PIEŚNI...">
 </div>
 </header>
 
+<div id="cat-bar"></div>
 <div class="grid" id="videos"></div>
 
 <div class="spacer"></div>
@@ -448,6 +487,7 @@ r.c[8]?.v || ""
 
 .sort((a,b) => b.order - a.order);
 
+buildCatBar();
 render(videos);
 
 });
@@ -704,6 +744,45 @@ const diff = e.changedTouches[0].clientX - touchStartX;
 if(diff > 60 && touchStartX < 40) openDrawer();
 if(diff < -60) closeDrawer();
 });
+
+
+let currentCat = "Wszystkie";
+
+function buildCatBar(){
+const catSet = new Set();
+videos.forEach(v => {
+v.category.split(",").forEach(c => {
+const trimmed = c.trim();
+if(trimmed) catSet.add(trimmed);
+});
+});
+
+const cats = ["Wszystkie", ...Array.from(catSet).sort()];
+const bar = document.getElementById("cat-bar");
+bar.innerHTML = "";
+
+cats.forEach(cat => {
+const btn = document.createElement("button");
+btn.className = "cat-btn" + (cat === currentCat ? " active" : "");
+btn.textContent = cat;
+btn.onclick = () => setCategory(cat);
+bar.appendChild(btn);
+});
+}
+
+function setCategory(cat){
+currentCat = cat;
+showingFavs = false;
+buildCatBar();
+if(cat === "Wszystkie"){
+render(videos);
+} else {
+const filtered = videos.filter(v =>
+v.category.split(",").map(c => c.trim()).includes(cat)
+);
+render(filtered);
+}
+}
 
 </script>
 
