@@ -602,9 +602,8 @@ JSON.stringify(favs)
 
 const searchVal = document.getElementById("search").value.trim();
 if(searchVal !== ""){
-// zostań w wynikach wyszukiwania - przelicz ręcznie bez event
 let pool = videos;
-if(currentCat === "❤️ Ulubione" || showingFavs){
+if(currentCat === "❤️ Ulubione"){
 const favs2 = JSON.parse(localStorage.getItem("favs") || "[]");
 pool = videos.filter(v => favs2.includes(v.youtube));
 } else if(currentCat !== "Wszystkie"){
@@ -614,7 +613,7 @@ render(pool.filter(v =>
 v.title.toLowerCase().includes(searchVal.toLowerCase()) ||
 v.category.toLowerCase().includes(searchVal.toLowerCase())
 ));
-} else if(currentCat === "❤️ Ulubione" || showingFavs){
+} else if(currentCat === "❤️ Ulubione"){
 setFavCategory();
 } else if(currentCat !== "Wszystkie"){
 setCategory(currentCat);
@@ -835,7 +834,7 @@ bar.appendChild(btn);
 
 function setFavCategory(){
 currentCat = "❤️ Ulubione";
-showingFavs = true;
+showingFavs = false;
 buildCatBar();
 showFavs();
 }
