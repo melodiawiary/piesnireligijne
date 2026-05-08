@@ -180,6 +180,9 @@ r.c[1]?.v || "",
 order:
 parseInt(r.c[4]?.v || 0),
 
+duration:
+r.c[3]?.v || "0:00",
+
 youtube:
 r.c[7]?.v || "",
 
@@ -307,6 +310,29 @@ render(videos);
 
 }
 
+function timeToSeconds(t){
+if(!t || typeof t !== "string") return 0;
+const parts = t.replace(/[^\d:]/g,"").split(":").map(Number);
+if(parts.length === 2) return (parts[0]||0)*60+(parts[1]||0);
+if(parts.length === 3) return (parts[0]||0)*3600+(parts[1]||0)*60+(parts[2]||0);
+return 0;
+}
+
+function buildDiscs(selected){
+const maxTime = 50*60;
+const discs = [];
+selected.forEach(v => {
+const sT = timeToSeconds(v.duration);
+let placed = false;
+for(let i = 0; i < discs.length; i++){
+const used = discs[i].reduce((acc,x) => acc+timeToSeconds(x.duration),0);
+if(used+sT <= maxTime){ discs[i].push(v); placed=true; break; }
+}
+if(!placed) discs.push([v]);
+});
+return discs;
+}
+
 function getFavMessage(){
 
 const favs =
@@ -319,20 +345,25 @@ videos.filter(v =>
 favs.includes(v.youtube)
 );
 
-return selected
-.map(v => "• " + v.order + " - " + v.title)
-.join("%0A");
+const discs = buildDiscs(selected);
+
+let lines = "Szczęść Boże Melodio Wiary!%0ANiech będzie pochwalony Jezus Chrystus.%0A%0AJestem zainteresowany/a płytami z tą muzyką:%0A%0A";
+
+discs.forEach((disc, idx) => {
+lines += "PŁYTA NUMER " + (idx+1) + ":%0A";
+disc.forEach(v => {
+lines += "• " + v.order + " - " + v.title + "%0A";
+});
+lines += "%0A";
+});
+
+return lines;
 
 }
 
 function sendMessenger(){
 
-const list = getFavMessage();
-
-const message =
-encodeURIComponent(
-"Szczęść Boże, Niech będzie pochwalony Jezus Chrystus.\n\nOto moja lista utworów, którymi jestem zainteresowany/a:\n\n"
-) + list;
+const message = getFavMessage();
 
 window.location.href =
 `https://m.me/MelodiaWiary?text=${message}`;
@@ -341,15 +372,10 @@ window.location.href =
 
 function sendEmail(){
 
-const list = getFavMessage();
-
-const message =
-encodeURIComponent(
-"Szczęść Boże, Niech będzie pochwalony Jezus Chrystus.\n\nOto moja lista utworów, którymi jestem zainteresowany/a:\n\n"
-) + list;
+const message = getFavMessage();
 
 window.location.href =
-`mailto:twojmail@example.com?subject=Lista utworów&body=${message}`;
+`mailto:melodiawiary@gmail.com?subject=Zamówienie płyt Melodia Wiary&body=${message}`;
 
 }
 
