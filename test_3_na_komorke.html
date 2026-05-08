@@ -368,8 +368,7 @@ function sendMessenger(){
 const msg = getFavMessage();
 if(!msg){ alert("Nie masz jeszcze ulubionych piosenek!"); return; }
 
-window.location.href =
-"https://m.me/MelodiaWiary?text=" + encodeURIComponent(msg);
+window.open("https://m.me/MelodiaWiary?text=" + encodeURIComponent(msg), "_blank");
 
 }
 
