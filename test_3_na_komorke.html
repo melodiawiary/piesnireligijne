@@ -600,7 +600,11 @@ localStorage.setItem(
 JSON.stringify(favs)
 );
 
-if(currentCat === "❤️ Ulubione" || showingFavs){
+const searchVal = document.getElementById("search").value;
+if(searchVal.trim() !== ""){
+// zostań w wynikach wyszukiwania
+document.getElementById("search").dispatchEvent(new Event("input"));
+} else if(currentCat === "❤️ Ulubione" || showingFavs){
 setFavCategory();
 } else if(currentCat !== "Wszystkie"){
 setCategory(currentCat);
